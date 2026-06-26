@@ -12,7 +12,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(SFML)
 
 #Project Name
-project("pong")
+project("Pongdemonium")
 #Set C++ Version
 set(CMAKE_CXX_STANDARD 17)
 #Adds All Files In "/src" To "MY_SOURCES" Variable
