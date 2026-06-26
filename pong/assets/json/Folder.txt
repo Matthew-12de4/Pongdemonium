@@ -1,0 +1,1 @@
+This is a file so git keeps the folder, as its needed to run the project
