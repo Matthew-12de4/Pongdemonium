@@ -22,14 +22,14 @@ file(GLOB_RECURSE MY_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/pong
 add_executable("${CMAKE_PROJECT_NAME}" "${MY_SOURCES}")
 
 #Copies All Folders And Files In "/Assets" To Build Folder For Application To Access
-add_custom_command(TARGET pong POST_BUILD
+add_custom_command(TARGET ${CMAKE_PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/pong/assets
-        $<TARGET_FILE_DIR:pong>/assets
+        $<TARGET_FILE_DIR:${CMAKE_PROJECT_NAME}>/assets
 )
 
 #Adds SFML Library To Project
-target_link_libraries(pong PRIVATE
+target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE
     SFML::System
     SFML::Window
     SFML::Graphics
