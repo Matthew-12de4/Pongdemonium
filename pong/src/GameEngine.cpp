@@ -19,8 +19,10 @@ GameEngine::GameEngine(sf::RenderWindow& window)
 	m_leaderButton(sf::Vector2f((float(window.getSize().x) / 2.f) - 300, (float(window.getSize().y) / 2.f) + 200), "", 42, "./assets/images/leaderButton.png"),
 	m_closeButton({ 60, 60 }, "", 1, "./assets/images/closeButton.png"),
 	m_volumeText(m_fontTex),
-	m_checkFlashingLights(sf::Vector2f((float(window.getSize().x) / 2.f) + 200, (float(window.getSize().y) / 2.f)), "./assets/images/unCheckedButton.png", "./assets/images/CheckedButton.png", false),
+	m_checkFlashingLights(sf::Vector2f((float(window.getSize().x) / 2.f) + 200, (float(window.getSize().y) / 2.f) ), "./assets/images/unCheckedButton.png", "./assets/images/CheckedButton.png", false),
 	m_flashingLightsTex(m_fontTex),
+	m_pureChaos(sf::Vector2f((float(window.getSize().x) / 2.f) + 200, (float(window.getSize().y) / 2.f)+ 100), "./assets/images/unCheckedButton.png", "./assets/images/CheckedButton.png", false),
+	m_pureChaosTex(m_fontTex),
 	m_currentMode(m_fontTex),
 	m_timedButton({ (float(window.getSize().x) / 2.f) - 300, (float(m_window.getSize().y) / 2.f)}, "", 1, "./assets/images/timeBased.png"),
 	m_scoredButton({ (float(window.getSize().x) / 2.f) - 300, (float(m_window.getSize().y) / 2.f) + 100 }, "", 1, "./assets/images/scoreBased.png"),
@@ -175,7 +177,7 @@ GameEngine::GameEngine(sf::RenderWindow& window)
 	// Audio
 	if (!m_rickMusic.openFromFile("./assets/audio/Never Gonna Give You Up 8Bit.mp3"))
 		return;
-	if (!m_nyanMusic.openFromFile("./assets/audio/Nyan Cat Theme.mp3"))
+	if (!m_nyanMusic.openFromFile("./assets/audio/Nyan Cat Theme.ogg"))
 		return;
 	if (!m_dvdMusic.openFromFile("./assets/audio/Dizzy.ogg"))
 		return;
@@ -193,7 +195,8 @@ GameEngine::GameEngine(sf::RenderWindow& window)
 		fileWrite.open("./assets/json/Options.json", std::ios::out);
 		optionsJS["volume"] = 100.f;
 		optionsJS["flashingLights"] = m_checkFlashingLights.isChecked();
-
+		optionsJS["pureChaos"] = m_pureChaos.isChecked();
+		m_chaos.setPureChaos(m_pureChaos.isChecked());
 		fileWrite << std::setw(4) << optionsJS;
 		fileWrite.close();
 	}
@@ -202,10 +205,11 @@ GameEngine::GameEngine(sf::RenderWindow& window)
 		fileRead.open("./assets/json/Options.json", std::ios::in);
 
 		json OptionsPar = json::parse(fileRead);
-
 		sf::Listener::setGlobalVolume(OptionsPar.at("volume"));
 		m_flashingLights = OptionsPar.at("flashingLights");
 		m_checkFlashingLights.changeState(m_flashingLights);
+		m_pureChaos.changeState(OptionsPar.at("pureChaos"));
+		m_chaos.setPureChaos(m_pureChaos.isChecked());
 		fileRead.close();
 	}
 
@@ -285,6 +289,14 @@ GameEngine::GameEngine(sf::RenderWindow& window)
 	m_flashingLightsTex.setLineAlignment(sf::Text::LineAlignment::Center);
 	m_flashingLightsTex.setOrigin(m_flashingLightsTex.getLocalBounds().getCenter());
 	m_flashingLightsTex.setPosition({ (m_checkFlashingLights.getShape().getPosition().x) - 250, m_checkFlashingLights.getShape().getPosition().y});
+	
+	m_pureChaosTex.setFont(m_fontTex);
+	m_pureChaosTex.setString("Pure Chaos");
+	m_pureChaosTex.setCharacterSize(42);
+	m_pureChaosTex.setFillColor(sf::Color::White);
+	m_pureChaosTex.setLineAlignment(sf::Text::LineAlignment::Center);
+	m_pureChaosTex.setOrigin(m_pureChaosTex.getLocalBounds().getCenter());
+	m_pureChaosTex.setPosition({ (m_pureChaos.getShape().getPosition().x) - 250, m_pureChaos.getShape().getPosition().y});
 }
 
 int GameEngine::generateRandom(int min, int max)
@@ -313,7 +325,7 @@ void GameEngine::draw()
 		{
 		case (GameStates::playing):
 			if (m_chaos.getChaos() != ChaosEffects::tripping
-				|| (m_chaos.getChaos() == ChaosEffects::meta && std::count(m_metaEffects.begin(), m_metaEffects.end(), ChaosEffects::tripping) > 0))
+				&& !(m_chaos.getChaos() == ChaosEffects::meta && std::count(m_metaEffects.begin(), m_metaEffects.end(), ChaosEffects::tripping) > 0))
 				m_window.clear(m_backColour);
 			if (m_chaos.getChaos() == ChaosEffects::meow) m_window.draw(m_catBackSprite);
 			if (m_chaos.getChaos() != ChaosEffects::meow)
@@ -368,6 +380,8 @@ void GameEngine::draw()
 			m_window.draw(m_volumeText);
 			m_checkFlashingLights.draw(m_window);
 			m_window.draw(m_flashingLightsTex);
+			m_pureChaos.draw(m_window);
+			m_window.draw(m_pureChaosTex);
 			m_window.display();
 			break;
 		case (GameStates::gameOver):
@@ -490,6 +504,8 @@ void GameEngine::handleButtons()
 		}
 		else
 			m_flashingLights = false;
+		if (m_pureChaos.isClickedCheckbox(m_window)) m_chaos.setPureChaos(true);
+		else m_chaos.setPureChaos(false);
 		break;
 	case GameStates::gameOver:
 		if (m_bottomButton.isClicked(m_window))
@@ -1044,7 +1060,7 @@ void GameEngine::run()
 				{
 					for (auto & i : m_ballVec)
 					{
-						i.setColour(sf::Color::White);
+						i.setColour(sf::Color::Black);
 					}
 				}
 			}
@@ -1073,12 +1089,12 @@ void GameEngine::run()
 				m_nyanMusic.play();
 			if (currentChaos == ChaosEffects::dvdWindow
 			|| (currentChaos == ChaosEffects::meta && std::count(m_metaEffects.begin(), m_metaEffects.end(), ChaosEffects::dvdWindow) > 0))
-				m_dvdMusic.play();
+				m_dvdMusic.stop();
 			if (currentChaos == ChaosEffects::jesusWheel)
 				m_jesusMusic.play();
 			if (currentChaos == ChaosEffects::laggy
 			|| (currentChaos == ChaosEffects::meta && std::count(m_metaEffects.begin(), m_metaEffects.end(), ChaosEffects::laggy) > 0))
-				m_8bitMusic.play();
+				m_8bitMusic.stop();
 			
 			if (currentChaos == ChaosEffects::speedyTimer)
 				speedyDuration += 5;
@@ -1098,11 +1114,11 @@ void GameEngine::run()
 			if (ElapsedSeconds.count() >= 0.005)
 			{
 				dvdStart = std::chrono::steady_clock::now();
-				if (m_window.getPosition().y <= 30 || m_window.getPosition().y + m_window.getSize().y >= sf::VideoMode::getDesktopMode().size.y - 80)
+				if (m_window.getPosition().y <= 1 || m_window.getPosition().y + m_window.getSize().y >= sf::VideoMode::getDesktopMode().size.y - 80)
 				{
 					windowVelocity.y = -windowVelocity.y;
 				}
-				if (m_window.getPosition().x <= 80 || m_window.getPosition().x + m_window.getSize().x >= sf::VideoMode::getDesktopMode().size.x)
+				if (m_window.getPosition().x <= 1 || m_window.getPosition().x + m_window.getSize().x >= sf::VideoMode::getDesktopMode().size.x)
 				{
 					windowVelocity.x = -windowVelocity.x;
 				}
@@ -1188,27 +1204,27 @@ void GameEngine::run()
 				}
 			}
 		}
+		
+		std::chrono::duration<double> elapsedColourSeconds = std::chrono::steady_clock::now() - colourStart;
+		
 		if (currentChaos == ChaosEffects::paddleColour
 			|| (currentChaos == ChaosEffects::meta && std::count(m_metaEffects.begin(), m_metaEffects.end(), ChaosEffects::paddleColour) > 0))
 		{
-			std::chrono::duration<double> elapsedColourSeconds = std::chrono::steady_clock::now() - colourStart;
 
-			if (elapsedColourSeconds.count() >= 0.1)
+			if (elapsedColourSeconds.count() >= 0.2)
 			{
 				m_paddle1.setColour(m_vecColours[colourInc]);
 				m_paddle2.setColour(m_vecColours[colourInc]);
 				colourInc++;
 				if (colourInc >= m_vecColours.size())
 					colourInc = 0;
-				colourStart = std::chrono::steady_clock::now();
 			}
 		}
 		if (currentChaos == ChaosEffects::ballColour
 			|| (currentChaos == ChaosEffects::meta && std::count(m_metaEffects.begin(), m_metaEffects.end(), ChaosEffects::ballColour) > 0))
 		{
-			std::chrono::duration<double> elapsedColourSeconds = std::chrono::steady_clock::now() - colourStart;
 
-			if (elapsedColourSeconds.count() >= 0.1)
+			if (elapsedColourSeconds.count() >= 0.2)
 			{
 				if (std::count(m_metaEffects.begin(), m_metaEffects.end(), ChaosEffects::manyBalls) > 0)
 				{
@@ -1221,13 +1237,11 @@ void GameEngine::run()
 				colourInc++;
 				if (colourInc >= m_vecColours.size())
 					colourInc = 0;
-				colourStart = std::chrono::steady_clock::now();
 			}
 		}
 		if (currentChaos == ChaosEffects::rapidBackgroundColour
 			|| (currentChaos == ChaosEffects::meta && std::count(m_metaEffects.begin(), m_metaEffects.end(), ChaosEffects::rapidBackgroundColour) > 0)) // play Nyan Cat music for duration of effect
 		{
-			std::chrono::duration<double> elapsedColourSeconds = std::chrono::steady_clock::now() - colourStart;
 
 			if (elapsedColourSeconds.count() >= 0.2)
 			{
@@ -1235,9 +1249,13 @@ void GameEngine::run()
 				colourInc++;
 				if (colourInc >= m_vecColours.size())
 					colourInc = 0;
-				colourStart = std::chrono::steady_clock::now();
 			}
 		}
+		
+		//Reset Colour Timer
+		if (elapsedColourSeconds.count() >= 0.2)
+			colourStart = std::chrono::steady_clock::now();
+		
 		if (currentChaos == ChaosEffects::rickBall)
 		{
 			std::chrono::duration<double> elapsedRickSeconds = std::chrono::steady_clock::now() - rickStart;
@@ -1472,6 +1490,7 @@ void GameEngine::optionsMenu()
 					fileWrite.open("./assets/json/Options.json", std::ios::out);
 					optionsJS["volume"] = sf::Listener::getGlobalVolume();
 					optionsJS["flashingLights"] = m_checkFlashingLights.isChecked();
+					optionsJS["pureChaos"] = m_pureChaos.isChecked();
 					fileWrite << std::setw(4) << optionsJS;
 					fileWrite.close();
 				}
@@ -1486,6 +1505,7 @@ void GameEngine::optionsMenu()
 						fileWrite.open("./assets/json/Options.json", std::ios::out);
 						optionsJS["volume"] = sf::Listener::getGlobalVolume(); // Sets Audio
 						optionsJS["flashingLights"] = m_checkFlashingLights.isChecked();
+						optionsJS["pureChaos"] = m_pureChaos.isChecked();
 						fileWrite << optionsJS;
 						fileWrite.close();
 

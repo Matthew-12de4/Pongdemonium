@@ -23,6 +23,8 @@ Chaos::Chaos(sf::RenderWindow& window, float& paddleSpeed, Paddle& paddle1, Padd
 	m_text.setPosition(sf::Vector2f(float(m_window.getSize().x) / 2, float(m_window.getSize().y) - 50 ));
 	m_text.setString("Chaos Mode");
 	m_text.setFillColor(sf::Color(250, 60, 250));
+	
+	m_pureChaos = false;
 
 	m_metaEffects = {
 		ChaosEffects::paddleSpeed, ChaosEffects::ballSpeed, ChaosEffects::paddleSize, ChaosEffects::ballSize, ChaosEffects::jitter, ChaosEffects::moveAnywhere,
@@ -41,7 +43,6 @@ void Chaos::setChaos(ChaosEffects effect)
 	m_cEffects = effect;
 }
 
-
 void Chaos::draw(sf::RenderWindow& window)
 {
 	window.draw(m_text);
@@ -55,6 +56,52 @@ void Chaos::setText(std::string text)
 void Chaos::setTextColour(sf::Color color)
 {
 	m_text.setFillColor(color);
+}
+std::string Chaos::toString(ChaosEffects effect)
+{
+	switch (effect)
+	{
+		case ChaosEffects::none: return "No Chaos";
+		case ChaosEffects::paddleSpeed: return "Paddle Speed";
+		case ChaosEffects::ballSpeed: return "Ball Speed";
+		case ChaosEffects::paddleSize: return "Paddle Size";
+		case ChaosEffects::ballSize: return "Ball Size";
+		case ChaosEffects::jesusWheel: return "Jesus Take The Wheel";
+		case ChaosEffects::jitter: return "Ball Jitter";
+		case ChaosEffects::moveAnywhere: return "Move Anywhere < >";
+		case ChaosEffects::manyBalls: return "Multiple Balls";
+		case ChaosEffects::paddleColour: return "Paddle Colours";
+		case ChaosEffects::ballColour: return "Ball Colours";
+		case ChaosEffects::invisiblePaddle: return "Invisible Paddle";
+		case ChaosEffects::invisibleBall: return "Invisible Ball";
+		case ChaosEffects::rapidBackgroundColour: return "Rapid Background Change";
+		case ChaosEffects::fakeCrash: return "Fake Crash";
+		case ChaosEffects::tripping: return "Tripping";
+		case ChaosEffects::aiAimBot: return "AI Aim Bot";
+		case ChaosEffects::squareBall: return "Square Ball";
+		case ChaosEffects::meta: return "Meta";
+		case ChaosEffects::speedyTimer: return "Speedy Timer";
+		case ChaosEffects::cannotWin: return "Cannot Win";
+		case ChaosEffects::rickBall: return "Rick Ball";
+		case ChaosEffects::invertControls: return "Inverted Controls";
+		case ChaosEffects::switchingSides: return "Switch Sides";
+		case ChaosEffects::dvdWindow: return "DVD Window";
+		case ChaosEffects::meow: return "Meow";
+		case ChaosEffects::rotatePaddle: return "Rotate Paddle";
+		case ChaosEffects::invertColour: return "Invert Colours";
+		case ChaosEffects::laggy: return "Lag";
+		default: return "Error";
+	}
+}
+
+void Chaos::setPureChaos(bool pureChaos)
+{
+	m_pureChaos = pureChaos;
+}
+
+bool Chaos::getPureChaos()
+{
+	return m_pureChaos;
 }
 
 void Chaos::setBasePaddleSpeed(float speed)
@@ -93,118 +140,64 @@ void Chaos::selectChaos(float& aiFOV, bool flashingLights)
 
 	m_text.setFillColor(sf::Color::White);
 	m_text.setFillColor(sf::Color(250, 60, 250));
+	m_text.setPosition(sf::Vector2f(float(m_window.getSize().x) / 2, float(m_window.getSize().y) - 50 ));
 	
 	// Select Effect
-	int random = dist(gen);
-	m_cEffects = ChaosEffects(random);
+	if (m_pureChaos)
+	{
+		m_cEffects = ChaosEffects(18); // Set effect to meta
+	}
+	else
+	{
+		int random = dist(gen);
+		m_cEffects = ChaosEffects(random);
+	}
 
-	std::stringstream ss;
-
+	m_ss.str("");
+	m_ss.clear();
+	m_ss << toString(m_cEffects);
+	m_text.setString(m_ss.str());
+	
 	switch (m_cEffects)
 	{
-	case ChaosEffects::none:
-		ss << "No Chaos\n";
-		break;
 	case ChaosEffects::paddleSpeed:
-		ss << "Paddle Speed\n";
 		paddleSpeed(aiFOV);
 		break;
 	case ChaosEffects::ballSpeed:
-		ss << "Ball Speed\n";
 		ballSpeed(aiFOV);
 		break;
 	case ChaosEffects::paddleSize:
-		ss << "Paddle Size\n";
 		paddleSize();
 		break;
 	case ChaosEffects::ballSize:
-		ss << "Ball Size\n";
 		ballSize();
 		break;
-	case ChaosEffects::jesusWheel:
-		ss << "Jesus Take The Wheel\n";
-		break;
-	case ChaosEffects::jitter:
-		ss << "Ball Jitter\n";
-		break;
-	case ChaosEffects::moveAnywhere:
-		ss << "Move Anywhere\n";
-		break;
 	case ChaosEffects::manyBalls:
-		ss << "Many Balls\n";
 		manyBall();
 		break;
-	case ChaosEffects::paddleColour:
-		ss << "Paddle Colour\n";
-		break;
-	case ChaosEffects::ballColour:
-		ss << "Ball Colour\n";
-		break;
 	case ChaosEffects::invisiblePaddle:
-		ss << "Invisible Paddle\n";
 		invisPaddle();
 		break;
 	case ChaosEffects::invisibleBall:
-		ss << "Invisible Ball\n";
 		invisBall();
 		break;
 	case ChaosEffects::rapidBackgroundColour:
 		// Prevents Flashing Lights If Toggled
-		if (flashingLights)
-			ss << "Rapid Background Shift\n";
-		else
+		if (!flashingLights)
 			selectChaos(aiFOV, flashingLights);
 		break;
-	case ChaosEffects::fakeCrash:
-		ss << "Fake Crash\n";
-		break;
-	case ChaosEffects::tripping:
-		ss << "Tripping\n";
-		break;
-	case ChaosEffects::aiAimBot:
-		ss << "Aim Bot\n";
-		break;
-	case ChaosEffects::squareBall:
-		ss << "Square Ball\n";
-		break;
 	case ChaosEffects::meta:
-		ss << "Meta\n";
 		meta(aiFOV, flashingLights);
 		break;
-	case ChaosEffects::speedyTimer:
-		ss << "Speedy Timer\n";
-		break;
-	case ChaosEffects::cannotWin:
-		ss << "Cannot Win\n";
-		break;
-	case ChaosEffects::rickBall:
-		ss << "Rick Ball\n";
-		break;
-	case ChaosEffects::invertControls:
-		ss << "Invert Controls\n";
-		break;
-	case ChaosEffects::switchingSides:
-		ss << "Switching Sides\n";
-		break;
-	case ChaosEffects::dvdWindow:
-		ss << "DVD Window\n";
-		break;
-	case ChaosEffects::meow:
-		ss << "Meow\n";
-		break;
 	case ChaosEffects::rotatePaddle:
-		ss << "Rotate Paddle\n";
 		rotatePaddle();
 		break;
-	case ChaosEffects::invertColour:
-		ss << "Invert Colour\n";
-		break;
 	case ChaosEffects::laggy:
-		ss << "Laggy\n";
 		laggy();
 		break;
+	default:
+		break;
 	}
-	m_text.setString(ss.str());
 }
 
 void Chaos::paddleSpeed(float& aiFOV)
@@ -324,11 +317,14 @@ void Chaos::meta(float& aiFOV, bool flashingLights)
 {
 	std::mt19937 gen(rd());
 	std::vector<ChaosEffects> unsortedEffects = m_metaEffects;
+	
+	// Choose between 3 - 5 Effects
+	std::uniform_int_distribution<> distAmount(3, 8);
 
 	if (!flashingLights)
 		unsortedEffects.erase(unsortedEffects.begin() + 9);
 
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < distAmount(gen); i++)
 	{
 		std::uniform_int_distribution<> dist(1, int(unsortedEffects.size()) - 1);
 
@@ -336,6 +332,24 @@ void Chaos::meta(float& aiFOV, bool flashingLights)
 		m_metaSortedEffects.push_back(unsortedEffects[rand]);
 		unsortedEffects.erase(unsortedEffects.begin() + rand);
 	}
+	
+	// Displays all current active Chaos Effects
+	float moveOffset = m_window.getSize().y - m_text.getGlobalBounds().getCenter().y;
+	m_ss.str("");
+	m_ss.clear();
+	m_metaSortedEffects.clear();
+	m_metaSortedEffects = {ChaosEffects::paddleColour, ChaosEffects::ballSize, ChaosEffects::manyBalls, ChaosEffects::dvdWindow, ChaosEffects::jitter};
+	int j = 0;
+	for (auto & i : m_metaSortedEffects)
+	{
+		j++;
+		m_ss << toString(i) << "\n";
+		//m_text.move({0, -moveOffset});
+	}
+	std::cerr << j << std::endl;
+	m_text.setPosition({float(m_window.getSize().x) / 2, (float(m_window.getSize().y) - 50) - moveOffset * (j + 1) });
+	
+	m_text.setString(m_ss.str());
 
 	if (std::count(m_metaSortedEffects.begin(), m_metaSortedEffects.end(), ChaosEffects::manyBalls) > 0)
 		manyBall();

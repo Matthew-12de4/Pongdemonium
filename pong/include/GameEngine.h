@@ -68,6 +68,8 @@ private:
 	Button m_checkFlashingLights;
 	bool m_flashingLights;
 	sf::Text m_flashingLightsTex;
+	Button m_pureChaos;
+	sf::Text m_pureChaosTex;
 
 	// Mode Select
 	sf::Text m_currentMode;

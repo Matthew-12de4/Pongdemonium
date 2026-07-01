@@ -15,13 +15,24 @@ FetchContent_MakeAvailable(SFML)
 project("Pongdemonium")
 #Set C++ Version
 set(CMAKE_CXX_STANDARD 17)
+
+#Code To Add All Source Files To Variable
+#file(GLOB_RECURSE MY_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/pong/src/*.cpp")
 #Adds All Files In "/src" To "MY_SOURCES" Variable
-file(GLOB_RECURSE MY_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/pong/src/*.cpp")
+set (MY_SOURCES
+        "pong/src/Ball.cpp"
+        "pong/src/Button.cpp"
+        "pong/src/Chaos.cpp"
+        "pong/src/GameEngine.cpp"
+        "pong/src/main.cpp"
+        "pong/src/Paddle.cpp"
+        "pong/src/Timer.cpp"
+)
 
 #Adds The Sources To The Application
 add_executable("${CMAKE_PROJECT_NAME}" "${MY_SOURCES}")
 
-#Copies All Folders And Files In "/Assets" To Build Folder For Application To Access
+#Copies All Folders And Files In "pong/assets" To Build Folder For Application To Access
 add_custom_command(TARGET ${CMAKE_PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/pong/assets

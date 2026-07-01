@@ -30,6 +30,10 @@ private:
 	// Text
 	sf::Font m_font;
 	sf::Text m_text;
+	std::stringstream m_ss;
+	
+	// To active constant multiple effects
+	bool m_pureChaos;
 
 	// Paddle/Ball
 	float& m_PaddleSpeed;
@@ -61,6 +65,11 @@ public:
 	void setText(std::string text);
 	void setTextColour(sf::Color color);
 
+	std::string toString(ChaosEffects effect);
+	
+	void setPureChaos(bool pureChaos);
+	bool getPureChaos();
+	
 	void setBasePaddleSpeed(float speed);
 	void setBaseBallSpeed(float speed);
 

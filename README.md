@@ -284,3 +284,10 @@ sudo cmake --build .
 ```
 
 </details>
+
+# Credit:
+
+Music provided by JJD, promoted by NCMFYT <br>
+Track: JJD - Nyan Cat <br>
+Listen on YouTube: https://bit.ly/3SoHdz6 <br>
+Stream: https://fanlink.tv/NyanCat
